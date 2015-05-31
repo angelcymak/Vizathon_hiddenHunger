@@ -68,36 +68,32 @@
 
 <body>
 
-<p>This is an R HTML document. When you click the <b>Knit HTML</b> button a web page will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:</p>
+Data can be found:<br>
+https://github.com/harvestchoice/nutrition_indicators<br><br>
+
+Summary<br>
+Using the Malawi household data, this exploratory analysis found a positive correlation between wealth and education(b6). The education level was recoded assuming that "Std" were primary level of education. It was found that diversity of diet is positively correlated with education level. However, there was an unexpected negative correlation of number of deficient micronutrients with education level. This relationship was more profound when households that were not deficient in calories and proteins were removed.
 
 <div class="chunk" id="unnamed-chunk-1"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl kwd">library</span><span class="hl std">(ggplot2)</span>
 <span class="hl std">fp.mwi.nutr</span> <span class="hl kwb">&lt;-</span> <span class="hl str">&quot;/Users/angelmak/Dropbox/git/nutrition_indicators/Malawi/mwi_nutrition.csv&quot;</span>
-<span class="hl std">fp.mwi.anthro</span> <span class="hl kwb">&lt;-</span> <span class="hl str">&quot;/Users/angelmak/Dropbox/git/nutrition_indicators/Malawi/mwi_anthropometry.csv&quot;</span>
 <span class="hl std">t.m.nutr</span> <span class="hl kwb">&lt;-</span> <span class="hl kwd">read.csv</span><span class="hl std">(fp.mwi.nutr)</span>
-<span class="hl std">t.m.anthro</span> <span class="hl kwb">&lt;-</span> <span class="hl kwd">read.csv</span><span class="hl std">(fp.mwi.anthro)</span>
 
-<span class="hl com"># deficiency</span>
-<span class="hl com">#names(t.m.nutr)</span>
-<span class="hl kwa">for</span> <span class="hl std">(i</span> <span class="hl kwa">in</span> <span class="hl num">1</span><span class="hl opt">:</span><span class="hl kwd">nrow</span><span class="hl std">(t.m.nutr)){</span>
-  <span class="hl std">t.m.nutr[i,</span><span class="hl str">&quot;defCount&quot;</span><span class="hl std">]</span> <span class="hl kwb">&lt;-</span> <span class="hl kwd">sum</span><span class="hl std">(t.m.nutr[i,</span><span class="hl num">257</span><span class="hl opt">:</span><span class="hl num">284</span><span class="hl std">]</span> <span class="hl opt">==</span> <span class="hl str">&quot;Yes&quot;</span><span class="hl std">)</span>
-<span class="hl std">}</span>
-
-<span class="hl com"># deficiency without kcal</span>
-<span class="hl kwd">names</span><span class="hl std">(t.m.nutr[,</span><span class="hl num">257</span><span class="hl opt">:</span><span class="hl num">284</span><span class="hl std">])</span>
+<span class="hl com"># variables indicating deficiency in nutrients, in the required level</span>
+<span class="hl std">req.names</span> <span class="hl kwb">&lt;-</span> <span class="hl kwd">names</span><span class="hl std">(t.m.nutr)[</span><span class="hl kwd">grep</span><span class="hl std">(</span><span class="hl str">&quot;req_hh&quot;</span><span class="hl std">,</span><span class="hl kwd">names</span><span class="hl std">(t.m.nutr))]</span>
+<span class="hl com"># variables indicating deficiency in micro-nutrients(exclude calories and proteins), in the required level</span>
+<span class="hl std">req.names.micro</span> <span class="hl kwb">&lt;-</span> <span class="hl std">req.names[</span><span class="hl num">3</span><span class="hl opt">:</span><span class="hl num">14</span><span class="hl std">]</span>
+<span class="hl std">req.names.micro</span>
 </pre></div>
-<div class="output"><pre class="knitr r">##  [1] &quot;def_kcal_rec_hh&quot;     &quot;def_kcal_req_hh&quot;     &quot;def_prot_rec_hh&quot;    
-##  [4] &quot;def_prot_req_hh&quot;     &quot;def_iron_rec_hh&quot;     &quot;def_iron_req_hh&quot;    
-##  [7] &quot;def_zinc_rec_hh&quot;     &quot;def_zinc_req_hh&quot;     &quot;def_vita_A_rec_hh&quot;  
-## [10] &quot;def_vita_A_req_hh&quot;   &quot;def_vita_E_rec_hh&quot;   &quot;def_vita_E_req_hh&quot;  
-## [13] &quot;def_vita_C_rec_hh&quot;   &quot;def_vita_C_req_hh&quot;   &quot;def_ribof_rec_hh&quot;   
-## [16] &quot;def_ribof_req_hh&quot;    &quot;def_thia_rec_hh&quot;     &quot;def_thia_req_hh&quot;    
-## [19] &quot;def_nia_rec_hh&quot;      &quot;def_nia_req_hh&quot;      &quot;def_vita_B6_rec_hh&quot; 
-## [22] &quot;def_vita_B6_req_hh&quot;  &quot;def_fol_rec_hh&quot;      &quot;def_fol_req_hh&quot;     
-## [25] &quot;def_calcium_rec_hh&quot;  &quot;def_calcium_req_hh&quot;  &quot;def_vita_B12_rec_hh&quot;
-## [28] &quot;def_vita_B12_req_hh&quot;
+<div class="output"><pre class="knitr r">##  [1] &quot;def_iron_req_hh&quot;     &quot;def_zinc_req_hh&quot;     &quot;def_vita_A_req_hh&quot;  
+##  [4] &quot;def_vita_E_req_hh&quot;   &quot;def_vita_C_req_hh&quot;   &quot;def_ribof_req_hh&quot;   
+##  [7] &quot;def_thia_req_hh&quot;     &quot;def_nia_req_hh&quot;      &quot;def_vita_B6_req_hh&quot; 
+## [10] &quot;def_fol_req_hh&quot;      &quot;def_calcium_req_hh&quot;  &quot;def_vita_B12_req_hh&quot;
 </pre></div>
 <div class="source"><pre class="knitr r"><span class="hl kwa">for</span> <span class="hl std">(i</span> <span class="hl kwa">in</span> <span class="hl num">1</span><span class="hl opt">:</span><span class="hl kwd">nrow</span><span class="hl std">(t.m.nutr)){</span>
-  <span class="hl std">t.m.nutr[i,</span><span class="hl str">&quot;defCountMicro&quot;</span><span class="hl std">]</span> <span class="hl kwb">&lt;-</span> <span class="hl kwd">sum</span><span class="hl std">(t.m.nutr[i,</span><span class="hl num">259</span><span class="hl opt">:</span><span class="hl num">284</span><span class="hl std">]</span> <span class="hl opt">==</span> <span class="hl str">&quot;Yes&quot;</span><span class="hl std">)</span>
+  <span class="hl std">t.m.nutr[i,</span><span class="hl str">&quot;defCountReq&quot;</span><span class="hl std">]</span> <span class="hl kwb">&lt;-</span> <span class="hl kwd">sum</span><span class="hl std">(t.m.nutr[i,req.names]</span> <span class="hl opt">==</span> <span class="hl str">&quot;Yes&quot;</span> <span class="hl std">)</span>
+<span class="hl std">}</span>
+<span class="hl kwa">for</span> <span class="hl std">(i</span> <span class="hl kwa">in</span> <span class="hl num">1</span><span class="hl opt">:</span><span class="hl kwd">nrow</span><span class="hl std">(t.m.nutr)){</span>
+  <span class="hl std">t.m.nutr[i,</span><span class="hl str">&quot;defCountReqMicro&quot;</span><span class="hl std">]</span> <span class="hl kwb">&lt;-</span> <span class="hl kwd">sum</span><span class="hl std">(t.m.nutr[i,req.names.micro]</span> <span class="hl opt">==</span> <span class="hl str">&quot;Yes&quot;</span><span class="hl std">)</span>
 <span class="hl std">}</span>
 
 <span class="hl com">#Education -&gt; wealth</span>
@@ -112,6 +108,9 @@
 </pre></div>
 </div><div class="rimage default"><img src="figure/unnamed-chunk-1-1.png" title="plot of chunk unnamed-chunk-1" alt="plot of chunk unnamed-chunk-1" class="plot" /></div><div class="rcode">
 <div class="source"><pre class="knitr r"><span class="hl com">#Recode education level</span>
+<span class="hl com">#1=primary</span>
+<span class="hl com">#2=secondary</span>
+<span class="hl com">#3=tertiary</span>
 <span class="hl std">rowi.2</span> <span class="hl kwb">&lt;-</span> <span class="hl kwd">grep</span><span class="hl std">(</span><span class="hl str">&quot;Form&quot;</span><span class="hl std">,t.m.nutr</span><span class="hl opt">$</span><span class="hl std">b6)</span>
 <span class="hl std">rowi.1</span> <span class="hl kwb">&lt;-</span> <span class="hl kwd">grep</span><span class="hl std">(</span><span class="hl str">&quot;Std|No&quot;</span><span class="hl std">,t.m.nutr</span><span class="hl opt">$</span><span class="hl std">b6)</span>
 <span class="hl std">rowi.3</span> <span class="hl kwb">&lt;-</span> <span class="hl kwd">grep</span><span class="hl std">(</span><span class="hl str">&quot;College|Diploma&quot;</span><span class="hl std">,t.m.nutr</span><span class="hl opt">$</span><span class="hl std">b6)</span>
@@ -161,23 +160,7 @@
 <span class="hl std">plot</span>
 </pre></div>
 </div><div class="rimage default"><img src="figure/unnamed-chunk-1-4.png" title="plot of chunk unnamed-chunk-1" alt="plot of chunk unnamed-chunk-1" class="plot" /></div><div class="rcode">
-<div class="source"><pre class="knitr r"><span class="hl std">req.names</span> <span class="hl kwb">&lt;-</span> <span class="hl kwd">names</span><span class="hl std">(t.m.nutr)[</span><span class="hl kwd">grep</span><span class="hl std">(</span><span class="hl str">&quot;req_hh&quot;</span><span class="hl std">,</span><span class="hl kwd">names</span><span class="hl std">(t.m.nutr))]</span>
-<span class="hl std">req.names.micro</span> <span class="hl kwb">&lt;-</span> <span class="hl std">req.names[</span><span class="hl num">3</span><span class="hl opt">:</span><span class="hl num">14</span><span class="hl std">]</span>
-<span class="hl std">req.names.micro</span>
-</pre></div>
-<div class="output"><pre class="knitr r">##  [1] &quot;def_iron_req_hh&quot;     &quot;def_zinc_req_hh&quot;     &quot;def_vita_A_req_hh&quot;  
-##  [4] &quot;def_vita_E_req_hh&quot;   &quot;def_vita_C_req_hh&quot;   &quot;def_ribof_req_hh&quot;   
-##  [7] &quot;def_thia_req_hh&quot;     &quot;def_nia_req_hh&quot;      &quot;def_vita_B6_req_hh&quot; 
-## [10] &quot;def_fol_req_hh&quot;      &quot;def_calcium_req_hh&quot;  &quot;def_vita_B12_req_hh&quot;
-</pre></div>
-<div class="source"><pre class="knitr r"><span class="hl kwa">for</span> <span class="hl std">(i</span> <span class="hl kwa">in</span> <span class="hl num">1</span><span class="hl opt">:</span><span class="hl kwd">nrow</span><span class="hl std">(t.m.nutr)){</span>
-  <span class="hl std">t.m.nutr[i,</span><span class="hl str">&quot;defCountReq&quot;</span><span class="hl std">]</span> <span class="hl kwb">&lt;-</span> <span class="hl kwd">sum</span><span class="hl std">(t.m.nutr[i,req.names]</span> <span class="hl opt">==</span> <span class="hl str">&quot;Yes&quot;</span> <span class="hl std">)</span>
-<span class="hl std">}</span>
-<span class="hl kwa">for</span> <span class="hl std">(i</span> <span class="hl kwa">in</span> <span class="hl num">1</span><span class="hl opt">:</span><span class="hl kwd">nrow</span><span class="hl std">(t.m.nutr)){</span>
-  <span class="hl std">t.m.nutr[i,</span><span class="hl str">&quot;defCountReqMicro&quot;</span><span class="hl std">]</span> <span class="hl kwb">&lt;-</span> <span class="hl kwd">sum</span><span class="hl std">(t.m.nutr[i,req.names.micro]</span> <span class="hl opt">==</span> <span class="hl str">&quot;Yes&quot;</span><span class="hl std">)</span>
-<span class="hl std">}</span>
-
-<span class="hl std">t.m.nutr.lite</span> <span class="hl kwb">&lt;-</span> <span class="hl std">t.m.nutr[</span><span class="hl kwd">which</span><span class="hl std">(t.m.nutr</span><span class="hl opt">$</span><span class="hl std">def_kcal_rec_hh</span> <span class="hl opt">==</span> <span class="hl str">&quot;No&quot;</span> <span class="hl opt">&amp;</span> <span class="hl std">t.m.nutr</span><span class="hl opt">$</span><span class="hl std">def_prot_rec_hh</span> <span class="hl opt">==</span> <span class="hl str">&quot;No&quot;</span><span class="hl std">),]</span>
+<div class="source"><pre class="knitr r"><span class="hl std">t.m.nutr.lite</span> <span class="hl kwb">&lt;-</span> <span class="hl std">t.m.nutr[</span><span class="hl kwd">which</span><span class="hl std">(t.m.nutr</span><span class="hl opt">$</span><span class="hl std">def_kcal_rec_hh</span> <span class="hl opt">==</span> <span class="hl str">&quot;No&quot;</span> <span class="hl opt">&amp;</span> <span class="hl std">t.m.nutr</span><span class="hl opt">$</span><span class="hl std">def_prot_rec_hh</span> <span class="hl opt">==</span> <span class="hl str">&quot;No&quot;</span><span class="hl std">),]</span>
 <span class="hl com">#t.m.nutr.lite[1:10,257:284]</span>
 
 
@@ -203,7 +186,7 @@
 <span class="hl std">plot</span> <span class="hl kwb">&lt;-</span> <span class="hl kwd">ggplot</span><span class="hl std">()</span> <span class="hl opt">+</span> <span class="hl kwd">theme</span><span class="hl std">(</span><span class="hl kwc">panel.background</span> <span class="hl std">=</span> <span class="hl kwd">element_rect</span><span class="hl std">(</span><span class="hl kwc">fill</span><span class="hl std">=</span><span class="hl num">0</span><span class="hl std">,</span><span class="hl kwc">colour</span><span class="hl std">=</span><span class="hl str">&quot;black&quot;</span><span class="hl std">),</span> <span class="hl kwc">axis.ticks</span><span class="hl std">=</span><span class="hl kwd">element_blank</span><span class="hl std">(),</span> <span class="hl kwc">panel.grid</span> <span class="hl std">=</span> <span class="hl kwd">element_blank</span><span class="hl std">())</span>
 <span class="hl std">plot</span> <span class="hl kwb">&lt;-</span> <span class="hl std">plot</span> <span class="hl opt">+</span> <span class="hl kwd">theme</span><span class="hl std">(</span><span class="hl kwc">axis.text.x</span> <span class="hl std">=</span> <span class="hl kwd">element_text</span><span class="hl std">(</span><span class="hl kwc">angle</span><span class="hl std">=</span><span class="hl num">45</span><span class="hl std">,</span> <span class="hl kwc">hjust</span> <span class="hl std">=</span><span class="hl num">1</span><span class="hl std">))</span>
 <span class="hl std">plot</span> <span class="hl kwb">&lt;-</span> <span class="hl std">plot</span> <span class="hl opt">+</span> <span class="hl kwd">geom_boxplot</span><span class="hl std">(</span><span class="hl kwc">data</span><span class="hl std">=t.m.nutr.lite,</span><span class="hl kwd">aes</span><span class="hl std">(</span><span class="hl kwd">factor</span><span class="hl std">(t.m.nutr.lite</span><span class="hl opt">$</span><span class="hl std">edLvl),t.m.nutr.lite</span><span class="hl opt">$</span><span class="hl std">defCountReqMicro))</span>
-<span class="hl std">plot</span> <span class="hl kwb">&lt;-</span> <span class="hl std">plot</span> <span class="hl opt">+</span> <span class="hl kwd">labs</span><span class="hl std">(</span><span class="hl kwc">title</span><span class="hl std">=</span><span class="hl kwd">paste</span><span class="hl std">(</span><span class="hl str">&quot;N=723 (Household not deficient in kcal and protein)&quot;</span><span class="hl std">,</span><span class="hl kwc">sep</span><span class="hl std">=</span><span class="hl str">&quot;&quot;</span><span class="hl std">))</span> <span class="hl com">#+ theme(plot.title = element_text(size = rel(2), colour = &quot;blue&quot;))</span>
+<span class="hl std">plot</span> <span class="hl kwb">&lt;-</span> <span class="hl std">plot</span> <span class="hl opt">+</span> <span class="hl kwd">labs</span><span class="hl std">(</span><span class="hl kwc">title</span><span class="hl std">=</span><span class="hl kwd">paste</span><span class="hl std">(</span><span class="hl str">&quot;N=723/1124 (Household not deficient in kcal and protein)&quot;</span><span class="hl std">,</span><span class="hl kwc">sep</span><span class="hl std">=</span><span class="hl str">&quot;&quot;</span><span class="hl std">))</span> <span class="hl com">#+ theme(plot.title = element_text(size = rel(2), colour = &quot;blue&quot;))</span>
 <span class="hl std">plot</span> <span class="hl kwb">&lt;-</span> <span class="hl std">plot</span> <span class="hl opt">+</span> <span class="hl kwd">xlab</span><span class="hl std">(</span><span class="hl str">&quot;Education Level&quot;</span><span class="hl std">)</span> <span class="hl com"># x-axis title</span>
 <span class="hl std">plot</span> <span class="hl kwb">&lt;-</span> <span class="hl std">plot</span> <span class="hl opt">+</span> <span class="hl kwd">ylab</span><span class="hl std">(</span><span class="hl str">&quot;Number of deficient micronutrients&quot;</span><span class="hl std">)</span> <span class="hl com"># y-axis title</span>
 <span class="hl std">plot</span>
@@ -211,13 +194,14 @@
 </div><div class="rimage default"><img src="figure/unnamed-chunk-1-6.png" title="plot of chunk unnamed-chunk-1" alt="plot of chunk unnamed-chunk-1" class="plot" /></div><div class="rcode">
 <div class="source"><pre class="knitr r"><span class="hl kwd">dim</span><span class="hl std">(t.m.nutr)</span>
 </pre></div>
-<div class="output"><pre class="knitr r">## [1] 1142  315
+<div class="output"><pre class="knitr r">## [1] 1142  313
 </pre></div>
 <div class="source"><pre class="knitr r"><span class="hl kwd">dim</span><span class="hl std">(t.m.nutr.lite)</span>
 </pre></div>
-<div class="output"><pre class="knitr r">## [1] 723 315
+<div class="output"><pre class="knitr r">## [1] 723 313
 </pre></div>
-<div class="source"><pre class="knitr r"><span class="hl kwd">summary</span><span class="hl std">(</span><span class="hl kwd">factor</span><span class="hl std">(t.m.nutr.lite</span><span class="hl opt">$</span><span class="hl std">edLvl))</span>
+<div class="source"><pre class="knitr r"><span class="hl com"># Note that the number of households is small for those with Tertiary level of education</span>
+<span class="hl kwd">summary</span><span class="hl std">(</span><span class="hl kwd">factor</span><span class="hl std">(t.m.nutr.lite</span><span class="hl opt">$</span><span class="hl std">edLvl))</span>
 </pre></div>
 <div class="output"><pre class="knitr r">##   1   2   3 
 ## 638  81   4

@@ -6,25 +6,27 @@
 
 <body>
 
-<p>This is an R HTML document. When you click the <b>Knit HTML</b> button a web page will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:</p>
+Data can be found:<br>
+https://github.com/harvestchoice/nutrition_indicators<br><br>
+
+Summary<br>
+Using the Malawi household data, this exploratory analysis found a positive correlation between wealth and education(b6). The education level was recoded assuming that "Std" were primary level of education. It was found that diversity of diet is positively correlated with education level. However, there was an unexpected negative correlation of number of deficient micronutrients with education level. This relationship was more profound when households that were not deficient in calories and proteins were removed.
 
 <!--begin.rcode
 library(ggplot2)
 fp.mwi.nutr <- "/Users/angelmak/Dropbox/git/nutrition_indicators/Malawi/mwi_nutrition.csv"
-fp.mwi.anthro <- "/Users/angelmak/Dropbox/git/nutrition_indicators/Malawi/mwi_anthropometry.csv"
 t.m.nutr <- read.csv(fp.mwi.nutr)
-t.m.anthro <- read.csv(fp.mwi.anthro)
 
-# deficiency
-#names(t.m.nutr)
+# variables indicating deficiency in nutrients, in the required level
+req.names <- names(t.m.nutr)[grep("req_hh",names(t.m.nutr))]
+# variables indicating deficiency in micro-nutrients(exclude calories and proteins), in the required level
+req.names.micro <- req.names[3:14]
+req.names.micro
 for (i in 1:nrow(t.m.nutr)){
-  t.m.nutr[i,"defCount"] <- sum(t.m.nutr[i,257:284] == "Yes")
+  t.m.nutr[i,"defCountReq"] <- sum(t.m.nutr[i,req.names] == "Yes" )
 }
-
-# deficiency without kcal
-names(t.m.nutr[,257:284])
 for (i in 1:nrow(t.m.nutr)){
-  t.m.nutr[i,"defCountMicro"] <- sum(t.m.nutr[i,259:284] == "Yes")
+  t.m.nutr[i,"defCountReqMicro"] <- sum(t.m.nutr[i,req.names.micro] == "Yes")
 }
 
 #Education -> wealth
@@ -38,6 +40,9 @@ plot <- plot + ylab("Wealth") # y-axis title
 plot
 
 #Recode education level
+#1=primary
+#2=secondary
+#3=tertiary
 rowi.2 <- grep("Form",t.m.nutr$b6)
 rowi.1 <- grep("Std|No",t.m.nutr$b6)
 rowi.3 <- grep("College|Diploma",t.m.nutr$b6)
@@ -72,17 +77,6 @@ plot <- plot + ylab("Diversity of diet (Simpson index)") # y-axis title
 plot
 
 
-
-req.names <- names(t.m.nutr)[grep("req_hh",names(t.m.nutr))]
-req.names.micro <- req.names[3:14]
-req.names.micro
-for (i in 1:nrow(t.m.nutr)){
-  t.m.nutr[i,"defCountReq"] <- sum(t.m.nutr[i,req.names] == "Yes" )
-}
-for (i in 1:nrow(t.m.nutr)){
-  t.m.nutr[i,"defCountReqMicro"] <- sum(t.m.nutr[i,req.names.micro] == "Yes")
-}
-
 t.m.nutr.lite <- t.m.nutr[which(t.m.nutr$def_kcal_rec_hh == "No" & t.m.nutr$def_prot_rec_hh == "No"),]
 #t.m.nutr.lite[1:10,257:284]
 
@@ -116,7 +110,7 @@ plot
 dim(t.m.nutr)
 dim(t.m.nutr.lite)
 
-
+# Note that the number of households is small for those with Tertiary level of education
 summary(factor(t.m.nutr.lite$edLvl))
 end.rcode-->
 
