@@ -1,0 +1,126 @@
+<html>
+
+<head>
+<title>Title</title>
+</head>
+
+<body>
+
+<p>This is an R HTML document. When you click the <b>Knit HTML</b> button a web page will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:</p>
+
+<!--begin.rcode
+library(ggplot2)
+fp.mwi.nutr <- "/Users/angelmak/Dropbox/git/nutrition_indicators/Malawi/mwi_nutrition.csv"
+fp.mwi.anthro <- "/Users/angelmak/Dropbox/git/nutrition_indicators/Malawi/mwi_anthropometry.csv"
+t.m.nutr <- read.csv(fp.mwi.nutr)
+t.m.anthro <- read.csv(fp.mwi.anthro)
+
+# deficiency
+#names(t.m.nutr)
+for (i in 1:nrow(t.m.nutr)){
+  t.m.nutr[i,"defCount"] <- sum(t.m.nutr[i,257:284] == "Yes")
+}
+
+# deficiency without kcal
+names(t.m.nutr[,257:284])
+for (i in 1:nrow(t.m.nutr)){
+  t.m.nutr[i,"defCountMicro"] <- sum(t.m.nutr[i,259:284] == "Yes")
+}
+
+#Education -> wealth
+options("scipen"=100, "digits"=4) #Help print numeric text into numbers
+plot <- ggplot() + theme(panel.background = element_rect(fill=0,colour="black"), axis.ticks=element_blank(), panel.grid = element_blank()) 
+plot <- plot + theme(axis.text.x = element_text(angle=45, hjust =1))
+plot <- plot + geom_boxplot(data=t.m.nutr,aes(t.m.nutr$b6,t.m.nutr$wealth))
+plot <- plot + labs(title=paste("Wealth and Education Level",sep="")) #+ theme(plot.title = element_text(size = rel(2), colour = "blue"))
+plot <- plot + xlab("Education Level (b6)") # x-axis title
+plot <- plot + ylab("Wealth") # y-axis title
+plot
+
+#Recode education level
+rowi.2 <- grep("Form",t.m.nutr$b6)
+rowi.1 <- grep("Std|No",t.m.nutr$b6)
+rowi.3 <- grep("College|Diploma",t.m.nutr$b6)
+t.m.nutr$edLvl[rowi.1] <- 1
+t.m.nutr$edLvl[rowi.2] <- 2
+t.m.nutr$edLvl[rowi.3] <- 3
+
+#Using the new variable against wealth
+plot <- ggplot() + theme(panel.background = element_rect(fill=0,colour="black"), axis.ticks=element_blank(), panel.grid = element_blank()) 
+plot <- plot + theme(axis.text.x = element_text(angle=45, hjust =1))
+plot <- plot + geom_boxplot(data=t.m.nutr,aes(factor(t.m.nutr$edLvl),t.m.nutr$wealth))
+plot <- plot + xlab("Education Level (recoded)") # x-axis title
+plot <- plot + ylab("Wealth") # y-axis title
+plot
+
+table(t.m.nutr$edLvl,t.m.nutr$def_kcal_req_hh)
+table(t.m.nutr$edLvl,t.m.nutr$def_prot_req_hh)
+
+# Diversity of food
+plot <- ggplot() + theme(panel.background = element_rect(fill=0,colour="black"), axis.ticks=element_blank(), panel.grid = element_blank()) 
+plot <- plot + theme(axis.text.x = element_text(angle=45, hjust =1))
+plot <- plot + xlab("Education Level (recoded)") # x-axis title
+plot <- plot + ylab("Diversity of diet (Shannon index)") # y-axis title
+plot <- plot + geom_boxplot(data=t.m.nutr,aes(factor(t.m.nutr$edLvl),t.m.nutr$shannon_exp))
+plot
+
+plot <- ggplot() + theme(panel.background = element_rect(fill=0,colour="black"), axis.ticks=element_blank(), panel.grid = element_blank()) 
+plot <- plot + theme(axis.text.x = element_text(angle=45, hjust =1))
+plot <- plot + geom_boxplot(data=t.m.nutr,aes(factor(t.m.nutr$edLvl),t.m.nutr$simpson_exp))
+plot <- plot + xlab("Education Level (recoded)") # x-axis title
+plot <- plot + ylab("Diversity of diet (Simpson index)") # y-axis title
+plot
+
+
+
+req.names <- names(t.m.nutr)[grep("req_hh",names(t.m.nutr))]
+req.names.micro <- req.names[3:14]
+req.names.micro
+for (i in 1:nrow(t.m.nutr)){
+  t.m.nutr[i,"defCountReq"] <- sum(t.m.nutr[i,req.names] == "Yes" )
+}
+for (i in 1:nrow(t.m.nutr)){
+  t.m.nutr[i,"defCountReqMicro"] <- sum(t.m.nutr[i,req.names.micro] == "Yes")
+}
+
+t.m.nutr.lite <- t.m.nutr[which(t.m.nutr$def_kcal_rec_hh == "No" & t.m.nutr$def_prot_rec_hh == "No"),]
+#t.m.nutr.lite[1:10,257:284]
+
+
+# Deficiency
+plot <- ggplot() + theme(panel.background = element_rect(fill=0,colour="black"), axis.ticks=element_blank(), panel.grid = element_blank()) 
+plot <- plot + theme(axis.text.x = element_text(angle=45, hjust =1))
+plot <- plot + geom_boxplot(data=t.m.nutr,aes(factor(t.m.nutr$edLvl),t.m.nutr$defCountReqMicro))
+plot <- plot + xlab("Education Level") # x-axis title
+plot <- plot + ylab("Number of deficient micronutrients") # y-axis title
+plot
+
+#  Only on people who are not deficient in calory and protein 723/1142
+#plot <- ggplot() + theme(panel.background = element_rect(fill=0,colour="black"), axis.ticks=element_blank(), panel.grid = element_blank()) 
+#plot <- plot + theme(axis.text.x = element_text(angle=45, hjust =1))
+#plot <- plot + geom_boxplot(data=t.m.nutr.lite,aes(factor(t.m.nutr.lite$edLvl),t.m.nutr.lite$defCountReq))
+#plot <- plot + xlab("Education Level") # x-axis title
+#plot <- plot + ylab("Number of dificient micronutrients") # y-axis title
+#plot <- plot + labs(title=paste("N=723 (Household not deficient in kcal and protein)",sep="")) #+ theme(plot.title = element_text(size = rel(2), colour = "blue"))
+#plot
+
+# Only on people who are not deficient in calory and protein
+plot <- ggplot() + theme(panel.background = element_rect(fill=0,colour="black"), axis.ticks=element_blank(), panel.grid = element_blank()) 
+plot <- plot + theme(axis.text.x = element_text(angle=45, hjust =1))
+plot <- plot + geom_boxplot(data=t.m.nutr.lite,aes(factor(t.m.nutr.lite$edLvl),t.m.nutr.lite$defCountReqMicro))
+plot <- plot + labs(title=paste("N=723/1124 (Household not deficient in kcal and protein)",sep="")) #+ theme(plot.title = element_text(size = rel(2), colour = "blue"))
+plot <- plot + xlab("Education Level") # x-axis title
+plot <- plot + ylab("Number of deficient micronutrients") # y-axis title
+plot
+
+dim(t.m.nutr)
+dim(t.m.nutr.lite)
+
+
+summary(factor(t.m.nutr.lite$edLvl))
+end.rcode-->
+
+
+
+</body>
+</html>
