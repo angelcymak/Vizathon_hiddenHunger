@@ -1,0 +1,144 @@
+---
+title: "Vizathon 2015 - Hidden Hunger"
+author: "Angel Mak"
+date: "May 30, 2015"
+output: html_document
+---
+
+## Summary  
+Using the Malawi household data, this exploratory analysis found a positive correlation between wealth and education(b6). The education level was recoded assuming that "Std" were primary level of education. It was found that diversity of diet is positively correlated with education level. However, there was an unexpected negative correlation of number of deficient micronutrients with education level. This relationship was more profound when households that were not deficient in calories and proteins were removed.
+
+Data source:  
+https://github.com/harvestchoice/nutrition_indicators
+
+```{r, message=FALSE, warning=FALSE}
+library(ggplot2)
+fp.mwi.nutr <- "/Users/angelmak/Dropbox/git/nutrition_indicators/Malawi/mwi_nutrition.csv"
+t.m.nutr <- read.csv(fp.mwi.nutr)
+
+# variables indicating deficiency in nutrients, in the required level
+req.names <- names(t.m.nutr)[grep("req_hh",names(t.m.nutr))]
+# variables indicating deficiency in micro-nutrients(exclude calories and proteins), in the required level
+req.names.micro <- req.names[3:14]
+req.names.micro
+for (i in 1:nrow(t.m.nutr)){
+  t.m.nutr[i,"defCountReq"] <- sum(t.m.nutr[i,req.names] == "Yes" )
+}
+for (i in 1:nrow(t.m.nutr)){
+  t.m.nutr[i,"defCountReqMicro"] <- sum(t.m.nutr[i,req.names.micro] == "Yes")
+}
+```
+
+## A positive relationship of household wealth and education level (b6)
+
+```{r, message=FALSE, warning=FALSE}
+#Education -> wealth
+options("scipen"=100, "digits"=4) #Help print numeric text into numbers
+plot <- ggplot() + theme(panel.background = element_rect(fill=0,colour="black"), axis.ticks=element_blank(), panel.grid = element_blank()) 
+plot <- plot + theme(axis.text.x = element_text(angle=45, hjust =1))
+plot <- plot + geom_boxplot(data=t.m.nutr,aes(t.m.nutr$b6,t.m.nutr$wealth))
+plot <- plot + labs(title=paste("Wealth and Education Level",sep="")) #+ theme(plot.title = element_text(size = rel(2), colour = "blue"))
+plot <- plot + xlab("Education Level (b6)") # x-axis title
+plot <- plot + ylab("Wealth") # y-axis title
+plot
+```
+
+## Recoding education level
+
+The education level was recoded to show a clearer trend:  
+1=primary (No school and all "Std" levels)  
+2=secondary ("Form" levels)  
+3=tertiary  
+
+```{r, message=FALSE, warning=FALSE}
+#Recode education level
+#1=primary
+#2=secondary
+#3=tertiary
+rowi.2 <- grep("Form",t.m.nutr$b6)
+rowi.1 <- grep("Std|No",t.m.nutr$b6)
+rowi.3 <- grep("College|Diploma",t.m.nutr$b6)
+t.m.nutr$edLvl[rowi.1] <- 1
+t.m.nutr$edLvl[rowi.2] <- 2
+t.m.nutr$edLvl[rowi.3] <- 3
+
+#Using the new variable against wealth
+plot <- ggplot() + theme(panel.background = element_rect(fill=0,colour="black"), axis.ticks=element_blank(), panel.grid = element_blank()) 
+plot <- plot + theme(axis.text.x = element_text(angle=45, hjust =1))
+plot <- plot + geom_boxplot(data=t.m.nutr,aes(factor(t.m.nutr$edLvl),t.m.nutr$wealth))
+plot <- plot + xlab("Education Level (recoded)") # x-axis title
+plot <- plot + ylab("Wealth") # y-axis title
+plot
+
+table(t.m.nutr$edLvl,t.m.nutr$def_kcal_req_hh)
+table(t.m.nutr$edLvl,t.m.nutr$def_prot_req_hh)
+```
+
+## A positive relationship between education level and diversity of diet (Shannon index and Simpson index)
+
+```{r, message=FALSE, warning=FALSE}
+# Diversity of food
+plot <- ggplot() + theme(panel.background = element_rect(fill=0,colour="black"), axis.ticks=element_blank(), panel.grid = element_blank()) 
+plot <- plot + theme(axis.text.x = element_text(angle=45, hjust =1))
+plot <- plot + xlab("Education Level (recoded)") # x-axis title
+plot <- plot + ylab("Diversity of diet (Shannon index)") # y-axis title
+plot <- plot + geom_boxplot(data=t.m.nutr,aes(factor(t.m.nutr$edLvl),t.m.nutr$shannon_exp))
+plot
+
+plot <- ggplot() + theme(panel.background = element_rect(fill=0,colour="black"), axis.ticks=element_blank(), panel.grid = element_blank()) 
+plot <- plot + theme(axis.text.x = element_text(angle=45, hjust =1))
+plot <- plot + geom_boxplot(data=t.m.nutr,aes(factor(t.m.nutr$edLvl),t.m.nutr$simpson_exp))
+plot <- plot + xlab("Education Level (recoded)") # x-axis title
+plot <- plot + ylab("Diversity of diet (Simpson index)") # y-axis title
+plot
+```
+
+## A negative relationship was noticed between education level and the number of deficient micro-nutrients  
+
+The higher the education level of the households, the more the number of micronutrients they are missing.
+
+
+```{r, message=FALSE, warning=FALSE}
+t.m.nutr.lite <- t.m.nutr[which(t.m.nutr$def_kcal_rec_hh == "No" & t.m.nutr$def_prot_rec_hh == "No"),]
+#t.m.nutr.lite[1:10,257:284]
+
+
+# Deficiency
+plot <- ggplot() + theme(panel.background = element_rect(fill=0,colour="black"), axis.ticks=element_blank(), panel.grid = element_blank()) 
+plot <- plot + theme(axis.text.x = element_text(angle=45, hjust =1))
+plot <- plot + geom_boxplot(data=t.m.nutr,aes(factor(t.m.nutr$edLvl),t.m.nutr$defCountReqMicro))
+plot <- plot + xlab("Education Level") # x-axis title
+plot <- plot + ylab("Number of deficient micronutrients") # y-axis title
+plot
+```
+
+  
+The negative relationship becomes more prominent in the tertiary education level after removing households that were not deficient in calories and proteins  
+
+
+```{r, message=FALSE, warning=FALSE}
+# Only on people who are not deficient in calory and protein
+plot <- ggplot() + theme(panel.background = element_rect(fill=0,colour="black"), axis.ticks=element_blank(), panel.grid = element_blank()) 
+plot <- plot + theme(axis.text.x = element_text(angle=45, hjust =1))
+plot <- plot + geom_boxplot(data=t.m.nutr.lite,aes(factor(t.m.nutr.lite$edLvl),t.m.nutr.lite$defCountReqMicro))
+plot <- plot + labs(title=paste("N=723/1124 (Household not deficient in kcal and protein)",sep="")) #+ theme(plot.title = element_text(size = rel(2), colour = "blue"))
+plot <- plot + xlab("Education Level") # x-axis title
+plot <- plot + ylab("Number of deficient micronutrients") # y-axis title
+plot
+```
+
+Total number of household:
+```{r}
+nrow(t.m.nutr)
+```
+
+Number of household after removing those that were not deficient in carlories and proteins
+```{r}
+nrow(t.m.nutr.lite)
+```
+
+Note that the number of households is small for those with Tertiary level of education
+
+```{r}
+summary(factor(t.m.nutr.lite$edLvl))
+```
